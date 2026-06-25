@@ -1,6 +1,6 @@
 ![alt text](https://github.com/fitzypopper/BlockStack-Launcher/blob/435a2c7d538a18736e50a6118fbd28a99012ffc7/images/Logo.png "Logo Title Text 1")
 
-# Blocksack Launcher
+# Blockstack Launcher
 A lightweight, open-source, non-premium Minecraft launcher written for Linux entirely in Python by Fitzypopper. 
 
 ## Features
