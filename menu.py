@@ -25,7 +25,7 @@ DEFAULT_CONFIG = {
     "username": "Steve",
     "version": "1.21",
     "ram_max": "2G",
-    "java_path": "java",
+    "java_path": "auto",
     "game_dir": "instances/main"
 }
 
@@ -100,7 +100,7 @@ class LauncherMenu(tk.Tk):
         self.entry_gamedir.insert(0, self.config_data.get("game_dir", "instances/main"))
         self.entry_gamedir.pack(fill="x", padx=10)
         
-        ttk.Label(self.settings_tab, text="Java Path (Default: java):").pack(anchor="w", padx=10, pady=(15, 2))
+        ttk.Label(self.settings_tab, text="Java Path (Default: auto):").pack(anchor="w", padx=10, pady=(15, 2))
         self.entry_java = ttk.Entry(self.settings_tab)
         self.entry_java.insert(0, self.config_data.get("java_path", "java"))
         self.entry_java.pack(fill="x", padx=10)

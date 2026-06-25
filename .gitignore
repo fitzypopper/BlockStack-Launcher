@@ -13,3 +13,4 @@ resourcepacks/
 
 # Ignore local launcher config
 config.json
+runtimes/
