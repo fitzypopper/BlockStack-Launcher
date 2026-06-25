@@ -14,7 +14,7 @@ import subprocess
 import threading
 
 # === BRANDING & TEXTS ===
-APP_NAME = "BlockSack Launcher"
+APP_NAME = "BlockStack Launcher"
 APP_SUBTITLE = "Manage your profiles and instances"
 START_BUTTON_TEXT = "▶ START GAME"
 AUTHOR_TEXT = "Developed by fitzypopper"
