@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-BlockSack Launcher GUI
+BlockStack Launcher GUI
 A lightweight Tkinter interface to manage profiles, instances, and trigger the core launcher.
 """
 
