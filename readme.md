@@ -1,5 +1,5 @@
 # Blocksack Launcher
-A lightweight, open-source non-premium Minecraft launcher written entirely in Python by Fitzypopper. 
+A lightweight, open-source, non-premium Minecraft launcher written for Linux entirely in Python by Fitzypopper. 
 
 ## Features
 * Bypasses heavy bloatware - pure Python execution.
