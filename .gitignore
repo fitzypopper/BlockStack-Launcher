@@ -1,0 +1,15 @@
+# Ignore local Minecraft runtime data
+assets/
+libraries/
+versions/
+instances/
+logs/
+
+# Ignore game configurations and saves
+options.txt
+usercache.json
+saves/
+resourcepacks/
+
+# Ignore local launcher config
+config.json
