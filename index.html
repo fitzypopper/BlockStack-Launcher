@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlockStack Launcher — Lightweight Non-Premium Minecraft Launcher</title>
+<meta name="description" content="A lightweight, open-source, non-premium Minecraft launcher for Linux written entirely in Python. Pure Python execution, isolated instances, multi-threaded asset downloads.">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --panel: #1b1b1b;
+    --panel-2: #232323;
+    --border: #3a3a3a;
+    --text: #e8e8e8;
+    --muted: #9a9a9a;
+    --accent: #2ea043;
+    --accent-2: #238636;
+    --grass: #5cb85c;
+    --dirt: #8a5a2b;
+    --block: #3f3f3f;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0 2px, transparent 2px 4px),
+      linear-gradient(180deg, #121212 0%, var(--bg) 100%);
+    color: var(--text);
+    font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Minecraft-style blocky borders */
+  .mc-panel {
+    background: var(--panel);
+    border: 2px solid var(--border);
+    border-top-color: #565656;
+    border-left-color: #565656;
+    border-bottom-color: #202020;
+    border-right-color: #202020;
+    box-shadow: 0 0 0 2px #0a0a0a, 0 8px 24px rgba(0,0,0,0.5);
+  }
+
+  /* ===== Nav ===== */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(15,15,15,0.92);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  nav .logo img {
+    height: 40px;
+    width: 40px;
+    object-fit: cover;
+    image-rendering: pixelated;
+    border: 2px solid var(--block);
+  }
+  nav .brand {
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  nav .brand span { color: var(--accent); }
+  nav .links {
+    margin-left: auto;
+    display: flex;
+    gap: 20px;
+  }
+  nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: color 0.15s;
+  }
+  nav a:hover { color: var(--accent); }
+
+  /* ===== Hero ===== */
+  header.hero {
+    text-align: center;
+    padding: 80px 24px 60px;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  header.hero .logo-badge {
+    display: inline-block;
+    margin-bottom: 24px;
+  }
+  header.hero .logo-badge img {
+    width: 128px;
+    height: 128px;
+    object-fit: cover;
+    image-rendering: pixelated;
+    border: 4px solid var(--border);
+    box-shadow: 0 0 0 4px #0a0a0a, 0 12px 40px rgba(46,160,67,0.15);
+  }
+  header.hero h1 {
+    font-size: clamp(2rem, 6vw, 3.4rem);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  header.hero h1 .stack { color: var(--accent); }
+  header.hero p.tagline {
+    margin: 16px auto 32px;
+    max-width: 560px;
+    color: var(--muted);
+    font-size: 1.15rem;
+  }
+  .hero-cta {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .btn {
+    display: inline-block;
+    padding: 12px 28px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: #fff;
+    border: 2px solid;
+    border-color: #4bc35f #1c6b28 #1c6b28 #4bc35f;
+    background: linear-gradient(180deg, var(--accent) 0%, var(--accent-2) 100%);
+    transition: transform 0.08s, filter 0.15s;
+    cursor: pointer;
+  }
+  .btn:hover { filter: brightness(1.1); }
+  .btn:active { transform: translateY(2px); }
+  .btn.secondary {
+    background: linear-gradient(180deg, #4a4a4a 0%, #333 100%);
+    border-color: #5c5c5c #202020 #202020 #5c5c5c;
+  }
+  .btn.ghost {
+    background: transparent;
+    color: var(--text);
+    border-color: var(--border);
+  }
+
+  /* ===== Sections ===== */
+  section { max-width: 1000px; margin: 0 auto; padding: 40px 24px; }
+
+  section h2 {
+    font-size: 1.6rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+  section h2::after {
+    content: "";
+    display: block;
+    width: 64px;
+    height: 4px;
+    margin-top: 10px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+  }
+  section .sub {
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+
+  /* Features grid */
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 24px;
+  }
+  .feature {
+    padding: 20px;
+  }
+  .feature .icon {
+    font-size: 1.6rem;
+    display: block;
+    margin-bottom: 8px;
+  }
+  .feature h3 { font-size: 1.05rem; margin-bottom: 6px; }
+  .feature p { color: var(--muted); font-size: 0.92rem; }
+
+  /* Code */
+  .code-block {
+    background: #0a0a0a;
+    border: 2px solid var(--border);
+    padding: 16px 20px;
+    margin: 16px 0;
+    overflow-x: auto;
+  }
+  .code-block code {
+    font-family: "Cascadia Mono", "Fira Code", Consolas, monospace;
+    color: #7ee787;
+  }
+  .code-block .prompt { color: var(--muted); }
+
+  .run-steps { list-style: none; margin-top: 12px; }
+  .run-steps li {
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--border);
+    color: var(--muted);
+  }
+  .run-steps li strong { color: var(--text); }
+
+  /* Terminals / stat strip */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-top: 32px;
+  }
+  .stat { padding: 18px; text-align: center; }
+  .stat .value { font-size: 1.9rem; font-weight: 800; color: var(--accent); }
+  .stat .label { color: var(--muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+
+  /* Terminal demo */
+  .terminal {
+    margin-top: 24px;
+    font-family: "Cascadia Mono", "Fira Code", Consolas, monospace;
+    font-size: 0.85rem;
+    overflow: hidden;
+  }
+  .terminal .bar {
+    background: var(--panel-2);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .terminal .body { padding: 14px 16px; background: #0a0a0a; min-height: 120px; }
+  .terminal .body .line { white-space: pre-wrap; word-break: break-word; }
+  .terminal .ok { color: #7ee787; }
+  .terminal .info { color: #79b8ff; }
+  .terminal .warn { color: #f0c674; }
+  .terminal .cursor {
+    display: inline-block;
+    width: 9px; height: 14px;
+    background: var(--accent);
+    vertical-align: middle;
+    animation: blink 1s steps(2) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 40px 24px 32px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+  footer .badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+  .badge {
+    padding: 4px 12px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  @media (max-width: 640px) {
+    nav .links { display: none; }
+    header.hero { padding: 56px 16px 40px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><img src="images/Logo.png" alt="BlockStack Launcher logo"></div>
+  <div class="brand">Block<span>Stack</span></div>
+  <div class="links">
+    <a href="#features">Features</a>
+    <a href="#install">Install</a>
+    <a href="#source">Source</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="logo-badge"><img src="images/Logo.png" alt="BlockStack Launcher logo"></div>
+  <h1>Block<span class="stack">Stack</span> Launcher</h1>
+  <p class="tagline">
+    A lightweight, open-source, <strong>non-premium</strong> Minecraft launcher for Linux —
+    written entirely in Python. No bloat. No Electron. Just the game.
+  </p>
+  <div class="hero-cta">
+    <a class="btn" href="https://github.com/fitzypopper/BlockStack-Launcher" target="_blank" rel="noopener">Get it on GitHub</a>
+    <a class="btn secondary" href="#install">How to run</a>
+  </div>
+</header>
+
+<section id="features">
+  <h2>Features</h2>
+  <p class="sub">Everything you need, nothing you don't.</p>
+  <div class="features">
+    <div class="feature mc-panel">
+      <span class="icon">🧱</span>
+      <h3>Pure Python</h3>
+      <p>Bypasses heavy bloatware. The launcher runs entirely on Python — tiny footprint, fast startup.</p>
+    </div>
+    <div class="feature mc-panel">
+      <span class="icon">📁</span>
+      <h3>Isolated Instances</h3>
+      <p>Full support for separate instances (folders). Keep worlds and mods perfectly organized.</p>
+    </div>
+    <div class="feature mc-panel">
+      <span class="icon">⚡</span>
+      <h3>Multi-threaded Assets</h3>
+      <p>Concurrent downloads of libraries and assets from Mojang's official servers for faster installs.</p>
+    </div>
+    <div class="feature mc-panel">
+      <span class="icon">🖥️</span>
+      <h3>Simple Tkinter GUI</h3>
+      <p>A clean, tabbed interface for profiles, versions, RAM, and game directories. No clutter.</p>
+    </div>
+  </div>
+</section>
+
+<section id="install">
+  <h2>Install &amp; Run</h2>
+  <p class="sub">Linux only — three steps to launch.</p>
+
+  <ol class="run-steps">
+    <li><strong>Install dependencies</strong> — Python 3 and Tkinter: <code class="code-block" style="display:inline-block;padding:2px 8px;margin:0 4px;">sudo apt install python3-tk</code></li>
+    <li><strong>Clone the repo</strong>: <code class="code-block" style="display:inline-block;padding:2px 8px;margin:0 4px;">git clone https://github.com/fitzypopper/BlockStack-Launcher</code></li>
+    <li><strong>Launch the menu</strong>: <code class="code-block" style="display:inline-block;padding:2px 8px;margin:0 4px;">python3 menu.py</code></li>
+  </ol>
+
+  <div class="terminal mc-panel">
+    <div class="bar">BlockStack Launcher — terminal</div>
+    <div class="body" id="terminal-body">
+      <div class="line"><span class="info">[*]</span> Fetching manifest for version 1.21...</div>
+      <div class="line"><span class="info">[*]</span> Analyzing and downloading libraries...</div>
+      <div class="line"><span class="info">[*]</span> Preparing asset downloads...</div>
+      <div class="line"><span class="ok">[+]</span> Launching Minecraft 1.21 as Steve...</div>
+      <div class="line"><span class="prompt">$</span> <span class="cursor"></span></div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat mc-panel">
+      <div class="value">Python</div>
+      <div class="label">Language</div>
+    </div>
+    <div class="stat mc-panel">
+      <div class="value">0</div>
+      <div class="label">Dependencies</div>
+    </div>
+    <div class="stat mc-panel">
+      <div class="value">MIT</div>
+      <div class="label">License</div>
+    </div>
+    <div class="stat mc-panel">
+      <div class="value">Linux</div>
+      <div class="label">Platform</div>
+    </div>
+  </div>
+</section>
+
+<section id="source">
+  <h2>Open Source</h2>
+  <p class="sub">
+    Developed by <a href="https://github.com/fitzypopper" style="color:var(--accent)">fitzypopper</a>.
+    Licensed under the MIT License — read it, fork it, build on it.
+  </p>
+  <a class="btn ghost" href="https://github.com/fitzypopper/BlockStack-Launcher" target="_blank" rel="noopener">View source code</a>
+</section>
+
+<footer>
+  <div class="badges">
+    <span class="badge">MIT License</span>
+    <span class="badge">Open Source</span>
+    <span class="badge">Non-Premium</span>
+  </div>
+  <p>BlockStack Launcher is an independent project and is not affiliated with Mojang or Microsoft.</p>
+  <p style="margin-top:6px">Built by <a href="https://github.com/fitzypopper" target="_blank" rel="noopener">fitzypopper</a> · <a href="https://github.com/fitzypopper/BlockStack-Launcher" target="_blank" rel="noopener">github.com/fitzypopper/BlockStack-Launcher</a></p>
+</footer>
+
+<script>
+  (function () {
+    var lines = [
+      { text: "--- BlockStack Launcher CLI ---", cls: "info" },
+      { text: "[*] Fetching manifest for version 1.21...", cls: "info" },
+      { text: "[*] Analyzing and downloading libraries...", cls: "info" },
+      { text: "[*] Preparing asset downloads...", cls: "info" },
+      { text: "[*] Downloads complete. Building launch parameters...", cls: "info" },
+      { text: "[+] Launching Minecraft 1.21 as Steve...", cls: "ok" }
+    ];
+    var body = document.getElementById("terminal-body");
+    if (!body) return;
+    var i = 0;
+    var timer = setInterval(function () {
+      if (i < lines.length) {
+        var div = document.createElement("div");
+        div.className = "line";
+        var span = document.createElement("span");
+        span.className = lines[i].cls;
+        span.textContent = lines[i].text;
+        div.appendChild(span);
+        body.insertBefore(div, body.lastElementChild);
+        i++;
+      } else {
+        clearInterval(timer);
+      }
+    }, 900);
+  })();
+</script>
+</body>
+</html>
